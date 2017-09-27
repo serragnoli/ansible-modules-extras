@@ -41,10 +41,16 @@ options:
     required: true
 '''
 
-RETURN = '''
-'''
-
 EXAMPLES = '''
+# Replace the string (note the hint ':s') that matches 'Choc' by a string (note the hint 's' again) by banana
+-  json_value_replace:
+    json_string: "{{contents|to_json}}"
+    condition_field: name
+    condition_value: Choc:s
+    changing_field: handoutMode
+    changing_field_new_value: Banana:s
+    
+# Replace a string (hint 's') 
 '''
 
 
