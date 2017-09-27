@@ -10,7 +10,7 @@ short_description: Replace values in JSON that fulfil a condition
 description:
   - This module allows a field in a JSON value to be replaced given a condition is true.
   - It currently only works with up to 2 levels of nesting in the JSON.
-  - In pizza representation like "{name: Choc, topping {id: 5001, type: Chocolate}}" you'd be able to change fields on the same level on "name" and "type", being "type" what is meant by "2nd Level"
+  - In pizza representation like '{name = Choc, topping {id = 5001, type = Chocolate}}' you'd be able to change fields on the same level on "name" and "type", being "type" what is meant by "2nd Level"
   - The module requires the values to be hinted so the proper convertion can be performed.
   - The supported hints are "b -> boolean, i -> integer, f -> float and s -> string"
 version_added: "2.4.0"
