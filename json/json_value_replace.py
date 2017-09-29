@@ -11,7 +11,7 @@ description:
   - This module allows the value of a field in JSON to be replaced.
   - Value can only be changed if the conditions is true.
   - It can operate on up to 1 level of nesting in the JSON. For example
-    - In pizza JSON similar to '{name = Choc, topping = {id = 5001, type = Chocolate}}' you'd be able to change the fields
+    - In pizza JSON similar to '{name = Chocoholic, toppings = {id = 5001, type = Chocolate}}' you'd be able to change the fields
       on the same level on "name" and "type".
   - This module requires the values to be hinted so it can be converted accordingly.
     - Supported hints are "b -> boolean, i -> integer, f -> float and s -> string"
@@ -25,7 +25,7 @@ options:
   condition_field:
     description:
       - The path (dot-separated) to the field which the condition will be evaluated for. Example
-        For the pizza representation above "topping.id".
+        For the pizza representation above "toppings.id".
     required: true
   condition_value:
     description:
@@ -46,17 +46,37 @@ options:
 '''
 
 EXAMPLES = '''
-# Replace the string (note the hint ':s') that matches 'Choc' by a string (note the hint 's' again) by banana
+# Replace the text (hint ':s') that matches 'Chocoholic' by the text (hint 's' again) 'Bananaholic' on the parent level
 - json_value_replace:
     json_string: "{{contents|to_json}}"
     condition_field: name
-    condition_value: Choc:s
+    condition_value: Chocoholic:s
     changing_field: name
-    changing_field_new_value: Banana:s
+    changing_field_new_value: Bananaholic:s
     
-# Replace a string (hint 's')
+# Replace the topping id (hint ':i') that matches '5001' by the float (hint 'f') '123'
+- json_value_replace:
+    json_string: "{{contents|to_json}}"
+    condition_field: toppings.id
+    condition_value: 5001:i
+    changing_field: id
+    changing_field_new_value: 123:f
+
+# Replace the topping type to 'Chocolate' if the topping id matches (hint ':i') '5001'
+- json_value_replace:
+    json_string: "{{contents|to_json}}"
+    condition_field: toppings.id
+    condition_value: 5001:i
+    changing_field: type
+    changing_field_new_value: Chocolate:s
  
-# Replace a value NULL
+# Add id '123' to the topping that has id null (just don't add anything before the hint, any hint must still be present)
+- json_value_replace:
+    json_string: "{{contents|to_json}}"
+    condition_field: toppings.id
+    condition_value: :i
+    changing_field: id
+    changing_field_new_value: 123:i
 '''
 
 
