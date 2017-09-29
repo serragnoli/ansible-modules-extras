@@ -6,51 +6,57 @@ from ansible.module_utils.basic import *
 DOCUMENTATION = '''
 ---
 module: json_value_replace
-short_description: Replace values in JSON that fulfil a condition
+short_description: Replace values in json that fulfil a condition. Values must be type-hinted.
 description:
-  - This module allows a field in a JSON value to be replaced given a condition is true.
-  - It currently only works with up to 2 levels of nesting in the JSON.
-  - In pizza representation like '{name = Choc, topping {id = 5001, type = Chocolate}}' you'd be able to change fields on the same level on "name" and "type", being "type" what is meant by "2nd Level"
-  - The module requires the values to be hinted so the proper convertion can be performed.
-  - The supported hints are "b -> boolean, i -> integer, f -> float and s -> string"
+  - This module allows the value of a field in JSON to be replaced.
+  - Value can only be changed if the conditions is true.
+  - It can operate on up to 1 level of nesting in the JSON. For example
+    - In pizza JSON similar to '{name = Choc, topping = {id = 5001, type = Chocolate}}' you'd be able to change the fields
+      on the same level on "name" and "type".
+  - This module requires the values to be hinted so it can be converted accordingly.
+    - Supported hints are "b -> boolean, i -> integer, f -> float and s -> string"
 version_added: "2.4.0"
 author: "Fabio Serragnoli (@serragnoli)"
 options:
   json_string:
     description:
-      - Json string representation of the file to be processed.
+      - Json string representation of the file to be processed, it cannot be escaped.
     required: true
   condition_field:
     description:
-      - The path (dot-separated) to the field which the condition will be evaluated for.
-      - Entry example still for the pizza representation above "topping.id"
+      - The path (dot-separated) to the field which the condition will be evaluated for. Example
+        For the pizza representation above "topping.id".
     required: true
   condition_value:
     description:
-      - The value that will be evaluated in the field above.
-      - Note that hints of the type of the value need to be passed here "b -> boolean, i -> integer, f- float and s -> string"
+      - The evaluation criterion for the field above.
+      - Note that hints of the type of the value need to be passed here "b -> boolean, i -> integer, f- float and s -> string".
     required: true
   changing_field:
     description:
-      - The field in the Json that will need to be modified in case the 'condition_value' above is found in the field 'condition_field'.
-      - This field must be on the same level of the 'condition_field'. It can be the same field as "condition_field". See more details in the examples below.
+      - The field which the value is to be changed. It doesn't need to be the same field of the condition.
+      - It can 'condition_field' itself. If not, it must be sibling of the 'condition_field'.
+      - The first matching condition will be changes when more than one matches
     required: true
   changing_field_new_value:
     description:
-      - The new value of the field 'changing_field'. This value also need to be hinted "b -> boolean, i -> integer, f- float and s -> string"
+      - The new value of the field 'changing_field'.
+      - This value also need to be hinted "b -> boolean, i -> integer, f- float and s -> string".
     required: true
 '''
 
 EXAMPLES = '''
 # Replace the string (note the hint ':s') that matches 'Choc' by a string (note the hint 's' again) by banana
--  json_value_replace:
+- json_value_replace:
     json_string: "{{contents|to_json}}"
     condition_field: name
     condition_value: Choc:s
-    changing_field: handoutMode
+    changing_field: name
     changing_field_new_value: Banana:s
     
-# Replace a string (hint 's') 
+# Replace a string (hint 's')
+ 
+# Replace a value NULL
 '''
 
 
@@ -127,6 +133,8 @@ def parse_condition_value(cond_value, slt_module):
         slt_module.fail_json(msg="You probably forgot to add the type hint. Ex.: \'1111:i\'")
 
     try:
+        if the_value is None or len(the_value) == 0:
+            return None
         if the_type == "s":
             return str(the_value)
         elif the_type == "b":
